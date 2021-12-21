@@ -81,9 +81,9 @@ contract Minter {
       }
       require(totalMinted.add(amount) <= cap, "Cap reached");
 
+      totalMinted = totalMinted.add(amount);
       IERC20(token).mint(pools[i].receiver, amount);
 
-      totalMinted = totalMinted.add(amount);
       emit Mint(pools[i].receiver, amount);
     }
 
