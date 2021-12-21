@@ -59,6 +59,7 @@ contract Minter {
   constructor(address newToken, uint256 startBlock, address newAdmin){
     require(startBlock >= block.number, "Start block must be above current block");
     require(newToken != address(0), 'Token cannot be address 0');
+    require(newAdmin != address(0), 'Admin cannot be address 0');
 
     token = newToken;
     lastMintBlock = startBlock;
