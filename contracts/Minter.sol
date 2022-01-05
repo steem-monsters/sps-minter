@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-interface IERC20 {
+interface IMintable {
   function mint(address to, uint256 amount) external;
   function decimals() external returns (uint256);
 }
@@ -79,7 +79,7 @@ contract Minter {
       require(totalMinted.add(amount) <= cap, "Cap reached");
 
       totalMinted = totalMinted.add(amount);
-      IERC20(token).mint(pools[i].receiver, amount);
+      IMintable(token).mint(pools[i].receiver, amount);
 
       emit Mint(pools[i].receiver, amount);
     }
