@@ -1,8 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 interface IERC20 {
   function mint(address to, uint256 amount) external;
   function decimals() external returns (uint256);
@@ -12,8 +10,6 @@ interface IERC20 {
 /// @author Splinterlands Team (@fbslo)
 
 contract Minter {
-  using SafeMath for uint256;
-
   /// @notice Address that can change pools
   address public admin;
   /// @notice Address of the token to mint
