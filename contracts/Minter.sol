@@ -20,6 +20,8 @@ contract Minter {
   uint256 public totalMinted;
   /// @notice Maximum number of tokens minted, 3B (with 18 decimal places)
   uint256 public cap = 3000000000000000000000000000;
+  /// @notice Maximum number of pools
+  uint256 public poolsCap = 100;
 
   /// @notice Struct to store information about each pool
   struct Pool {
@@ -93,6 +95,7 @@ contract Minter {
    * @param newAmount Amount of tokens per block
    */
   function addPool(address newReceiver, uint256 newAmount) external onlyAdmin {
+    require(pools.length <= poolsCap, 'Pools cap reached');
     pools.push(Pool(newReceiver, newAmount));
     emit PoolAdded(newReceiver, newAmount);
   }
