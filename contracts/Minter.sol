@@ -22,6 +22,8 @@ contract Minter {
   uint256 public cap = 3000000000000000000000000000;
   /// @notice Maximum number of pools
   uint256 public poolsCap = 100;
+  /// @notice Maximum amount per block
+  uint256 public maxPerBlock;
 
   /// @notice Struct to store information about each pool
   struct Pool {
@@ -53,8 +55,9 @@ contract Minter {
    * @param newToken Address of the token to mint
    * @param startBlock Initial lastMint block
    * @param newAdmin Initial admin address
+   * @param newMaxPerBlock Maximum amount minted per block
    */
-  constructor(address newToken, uint256 startBlock, address newAdmin){
+  constructor(address newToken, uint256 startBlock, address newAdmin, uint256 newMaxPerBlock){
     require(startBlock >= block.number, "Start block must be above current block");
     require(newToken != address(0), 'Token cannot be address 0');
     require(newAdmin != address(0), 'Admin cannot be address 0');
@@ -62,6 +65,7 @@ contract Minter {
     token = newToken;
     lastMintBlock = startBlock;
     admin = newAdmin;
+    maxPerBlock = newMaxPerBlock;
 
     emit UpdateAdmin(address(0), newAdmin);
   }
@@ -96,6 +100,7 @@ contract Minter {
    */
   function addPool(address newReceiver, uint256 newAmount) external onlyAdmin {
     require(pools.length <= poolsCap, 'Pools cap reached');
+    require(newAmount <= maxPerBlock, 'Maximum amount per block reached');
     pools.push(Pool(newReceiver, newAmount));
     emit PoolAdded(newReceiver, newAmount);
   }
@@ -107,6 +112,7 @@ contract Minter {
    * @param newAmount Amount of tokens per block
    */
   function updatePool(uint256 index, address newReceiver, uint256 newAmount) external onlyAdmin {
+    require(newAmount <= maxPerBlock, 'Maximum amount per block reached');
     mint();
     pools[index] = Pool(newReceiver, newAmount);
     emit PoolUpdated(index, newReceiver, newAmount);
@@ -133,6 +139,14 @@ contract Minter {
   function updateAdmin(address newAdmin) external onlyAdmin {
     emit UpdateAdmin(admin, newAdmin);
     admin = newAdmin;
+  }
+
+  /**
+   * @notice Update maximum amount per block
+   * @param newMaxPerBlock maximum number of token that is allowed to be minted
+   */
+  function updateAdmin(address newMaxPerBlock) external onlyAdmin {
+    maxPerBlock = newMaxPerBlock;
   }
 
   /**
