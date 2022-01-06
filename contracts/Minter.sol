@@ -77,14 +77,14 @@ contract Minter {
     uint256 mintDifference = block.number - lastMintBlock;
 
     for (uint256 i = 0; i < pools.length; i++){
-      uint256 amount = pools[i].amountPerBlock.mul(mintDifference);
+      uint256 amount = pools[i].amountPerBlock * mintDifference;
 
       if(totalMinted + amount >= cap && totalMinted != cap){
-        amount = cap.sub(totalMinted);
+        amount = cap - totalMinted;
       }
-      require(totalMinted.add(amount) <= cap, "Cap reached");
+      require(totalMinted + amount <= cap, "Cap reached");
 
-      totalMinted = totalMinted.add(amount);
+      totalMinted = totalMinted + amount;
       IMintable(token).mint(pools[i].receiver, amount);
 
       emit Mint(pools[i].receiver, amount);
@@ -145,7 +145,7 @@ contract Minter {
    * @notice Update maximum amount that can be created per block
    * @param newMaxPerBlock maximum number of token that is allowed to be minted per block
    */
-  function updateMaxPerBlock(address newMaxPerBlock) external onlyAdmin {
+  function updateMaxPerBlock(uint256 newMaxPerBlock) external onlyAdmin {
     maxPerBlock = newMaxPerBlock;
   }
 
