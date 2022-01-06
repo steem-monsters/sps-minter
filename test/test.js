@@ -16,7 +16,7 @@ describe("Minter", async function () {
 
     let currentBlockNumber = await ethers.provider.getBlockNumber()
     const Minter = await hre.ethers.getContractFactory("Minter");
-    minter = await Minter.deploy(testToken.address, currentBlockNumber + 1, accounts[0].address);
+    minter = await Minter.deploy(testToken.address, currentBlockNumber + 1, accounts[0].address, 1000000000000000);
     await minter.deployed();
   }
 
@@ -83,6 +83,36 @@ describe("Minter", async function () {
     let getAdmin = await minter.admin();
 
     expect(getAdmin).to.equal(accounts[1].address)
+  });
+
+  it("should mint 0 tokens if there are 0 pools", async function () {
+    await init()
+
+    let mint = await minter.mint();
+    await mint.wait();
+
+    let getSupply = await testToken.totalSupply()
+
+    expect(getSupply.toNumber()).to.equal(0)
+  });
+
+  it("should mint 0 tokens if cap is reached", async function () {
+    await init()
+
+    let updateMax = await minter.updateMaxPerBlock('3000000000000000000000000000')
+    await updateMax.wait();
+
+    let add = await minter.addPool(accounts[0].address, '3000000000000000000000000000');
+    await add.wait();
+
+    await mineBlocks(10)
+
+    let mint = await minter.mint();
+    await mint.wait();
+
+    let getSupply = await testToken.totalSupply()
+
+    expect(getSupply.toString()).to.equal('3000000000000000000000000000')
   });
 });
 
