@@ -142,10 +142,10 @@ contract Minter {
   }
 
   /**
-   * @notice Update maximum amount per block
-   * @param newMaxPerBlock maximum number of token that is allowed to be minted
+   * @notice Update maximum amount that can be created per block
+   * @param newMaxPerBlock maximum number of token that is allowed to be minted per block
    */
-  function updateAdmin(address newMaxPerBlock) external onlyAdmin {
+  function updateMaxPerBlock(address newMaxPerBlock) external onlyAdmin {
     maxPerBlock = newMaxPerBlock;
   }
 
