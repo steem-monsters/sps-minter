@@ -129,6 +129,8 @@ describe("Minter", async function () {
 
     let getSupply = await testToken.totalSupply()
 
+    await network.provider.send("evm_setAutomine", [true]);
+
     expect(getSupply.toString()).to.equal("1000")
   });
 });
