@@ -114,6 +114,23 @@ describe("Minter", async function () {
 
     expect(getSupply.toString()).to.equal('3000000000000000000000000000')
   });
+
+  it("should mint 0 tokens if 0 blocks elapsed", async function () {
+    await init()
+    await network.provider.send("evm_setAutomine", [false]);
+
+    let lastBlock = await minter.lastMintBlock()
+
+    await minter.addPool(accounts[0].address, '1000');
+    await minter.mint(); //mine for the first time
+    await minter.mint(); //should mine 0 tokens, since it's in the same block
+
+    await mineBlocks(1);
+
+    let getSupply = await testToken.totalSupply()
+
+    expect(getSupply.toString()).to.equal("1000")
+  });
 });
 
 async function mineBlocks(blockNumber) {
