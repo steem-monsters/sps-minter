@@ -134,12 +134,10 @@ contract SPSMinter {
    */
   function removePool(uint256 index) external onlyAdmin {
     mint();
-    address oldReceiver = pools[index].receiver;
-    uint256 oldAmount = pools[index].amountPerBlock;
+    emit PoolRemoved(index, pools[index].receiver, pools[index].amountPerBlock);
 
     pools[index] = pools[pools.length - 1];
     pools.pop();
-    emit PoolRemoved(index, oldReceiver, oldAmount);
   }
 
   /**
