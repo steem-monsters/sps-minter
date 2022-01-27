@@ -122,7 +122,7 @@ describe("Minter", async function () {
       let mint = await minter.mint();
       await mint.wait();
     } catch (e) {
-      expect(e.message).to.equal("VM Exception while processing transaction: reverted with reason string 'Cap reached'")
+      expect(e.message).to.equal("VM Exception while processing transaction: reverted with reason string 'SPSMinter: Cap reached'")
     }
   });
 
