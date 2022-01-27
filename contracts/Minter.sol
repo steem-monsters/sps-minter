@@ -8,7 +8,7 @@ interface IMintable {
 /// @title A Minter contract for Splinterlands
 /// @author Splinterlands Team (@fbslo)
 
-contract Minter {
+contract SPSMinter {
   /// @notice Address that can change pools
   address public admin;
   /// @notice Address of the token to mint
