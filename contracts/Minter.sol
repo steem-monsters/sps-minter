@@ -87,6 +87,8 @@ contract SPSMinter {
       mintDifference = block.number - lastMintBlock;
     }
 
+    lastMintBlock = block.number;
+
     for (uint256 i = 0; i < pools.length; i++){
       uint256 amount = pools[i].amountPerBlock * mintDifference;
 
@@ -99,8 +101,6 @@ contract SPSMinter {
 
       emit Mint(pools[i].receiver, amount);
     }
-
-    lastMintBlock = block.number;
   }
 
   /**
