@@ -47,7 +47,7 @@ contract SPSMinter {
 
   /// @notice Modifier to allow only admin to call certain functions
   modifier onlyAdmin(){
-    require(msg.sender == admin, '!admin');
+    require(msg.sender == admin, 'SPSMinter: Only admin');
     _;
   }
 
@@ -59,9 +59,9 @@ contract SPSMinter {
    * @param newMaxToPoolPerBlock Maximum amount minted per block
    */
   constructor(address newToken, uint256 startBlock, address newAdmin, uint256 newMaxToPoolPerBlock){
-    require(startBlock >= block.number, "Start block must be above current block");
-    require(newToken != address(0), 'Token cannot be address 0');
-    require(newAdmin != address(0), 'Admin cannot be address 0');
+    require(startBlock >= block.number, "SPSMinter: Start block must be above current block");
+    require(newToken != address(0), 'SPSMinter: Token cannot be address 0');
+    require(newAdmin != address(0), 'SPSMinter: Admin cannot be address 0');
 
     token = IMintable(newToken);
     lastMintBlock = startBlock;
@@ -75,7 +75,8 @@ contract SPSMinter {
    * @notice Mint tokens to all pools, can be called by anyone
    */
   function mint() public {
-    require(totalMinted != cap, "Cap reached");
+    require(totalMinted != cap, "SPSMinter: Cap reached");
+    require(block.number > lastMintBlock, "SPSMinter: Mint block not yet reached");
 
     uint256 mintDifference = block.number - lastMintBlock;
 
@@ -101,8 +102,8 @@ contract SPSMinter {
    * @param newAmount Amount of tokens per block
    */
   function addPool(address newReceiver, uint256 newAmount) external onlyAdmin {
-    require(pools.length <= poolsCap, 'Pools cap reached');
-    require(newAmount <= maxToPoolPerBlock, 'Maximum amount per block reached');
+    require(pools.length <= poolsCap, 'SPSMinter: Pools cap reached');
+    require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
     pools.push(Pool(newReceiver, newAmount));
     emit PoolAdded(newReceiver, newAmount);
   }
@@ -114,7 +115,7 @@ contract SPSMinter {
    * @param newAmount Amount of tokens per block
    */
   function updatePool(uint256 index, address newReceiver, uint256 newAmount) external onlyAdmin {
-    require(newAmount <= maxToPoolPerBlock, 'Maximum amount per block reached');
+    require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
     mint();
     pools[index] = Pool(newReceiver, newAmount);
     emit PoolUpdated(index, newReceiver, newAmount);
