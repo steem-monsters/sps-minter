@@ -3,7 +3,6 @@ pragma solidity ^0.8.11;
 
 interface IMintable {
   function mint(address to, uint256 amount) external;
-  function decimals() external returns (uint256);
 }
 
 /// @title A Minter contract for Splinterlands
