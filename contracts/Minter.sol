@@ -79,7 +79,10 @@ contract SPSMinter {
     require(block.number > lastMintBlock, "SPSMinter: Mint block not yet reached");
 
 
-    uint256 mintDifference = unchecked { block.number - lastMintBlock };
+    uint256 mintDifference;
+    unchecked {
+      mintDifference = block.number - lastMintBlock;
+    }
 
     for (uint256 i = 0; i < pools.length; i++){
       uint256 amount = pools[i].amountPerBlock * mintDifference;
