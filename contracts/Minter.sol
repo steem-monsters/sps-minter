@@ -21,7 +21,7 @@ contract Minter {
   /// @notice Maximum number of tokens minted, 3B (with 18 decimal places)
   uint256 public cap = 3000000000000000000000000000;
   /// @notice Maximum number of pools
-  uint256 public poolsCap = 100;
+  uint256 constant public poolsCap = 100;
   /// @notice Maximum amount per block
   uint256 public maxPerBlock;
 
