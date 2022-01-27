@@ -22,8 +22,8 @@ contract Minter {
   uint256 public cap = 3000000000000000000000000000;
   /// @notice Maximum number of pools
   uint256 constant public poolsCap = 100;
-  /// @notice Maximum amount per block
-  uint256 public maxPerBlock;
+  /// @notice Maximum amount per block to each pool
+  uint256 public maxToPoolPerBlock;
 
   /// @notice Struct to store information about each pool
   struct Pool {
@@ -55,9 +55,9 @@ contract Minter {
    * @param newToken Address of the token to mint
    * @param startBlock Initial lastMint block
    * @param newAdmin Initial admin address
-   * @param newMaxPerBlock Maximum amount minted per block
+   * @param newMaxToPoolPerBlock Maximum amount minted per block
    */
-  constructor(address newToken, uint256 startBlock, address newAdmin, uint256 newMaxPerBlock){
+  constructor(address newToken, uint256 startBlock, address newAdmin, uint256 newMaxToPoolPerBlock){
     require(startBlock >= block.number, "Start block must be above current block");
     require(newToken != address(0), 'Token cannot be address 0');
     require(newAdmin != address(0), 'Admin cannot be address 0');
@@ -65,7 +65,7 @@ contract Minter {
     token = newToken;
     lastMintBlock = startBlock;
     admin = newAdmin;
-    maxPerBlock = newMaxPerBlock;
+    maxToPoolPerBlock = newMaxToPoolPerBlock;
 
     emit UpdateAdmin(address(0), newAdmin);
   }
@@ -100,7 +100,7 @@ contract Minter {
    */
   function addPool(address newReceiver, uint256 newAmount) external onlyAdmin {
     require(pools.length <= poolsCap, 'Pools cap reached');
-    require(newAmount <= maxPerBlock, 'Maximum amount per block reached');
+    require(newAmount <= maxToPoolPerBlock, 'Maximum amount per block reached');
     pools.push(Pool(newReceiver, newAmount));
     emit PoolAdded(newReceiver, newAmount);
   }
@@ -112,7 +112,7 @@ contract Minter {
    * @param newAmount Amount of tokens per block
    */
   function updatePool(uint256 index, address newReceiver, uint256 newAmount) external onlyAdmin {
-    require(newAmount <= maxPerBlock, 'Maximum amount per block reached');
+    require(newAmount <= maxToPoolPerBlock, 'Maximum amount per block reached');
     mint();
     pools[index] = Pool(newReceiver, newAmount);
     emit PoolUpdated(index, newReceiver, newAmount);
@@ -143,10 +143,10 @@ contract Minter {
 
   /**
    * @notice Update maximum amount that can be created per block
-   * @param newMaxPerBlock maximum number of token that is allowed to be minted per block
+   * @param newMaxToPoolPerBlock maximum number of token that is allowed to be minted per block
    */
-  function updateMaxPerBlock(uint256 newMaxPerBlock) external onlyAdmin {
-    maxPerBlock = newMaxPerBlock;
+  function updateMaxPerBlock(uint256 newMaxToPoolPerBlock) external onlyAdmin {
+    maxToPoolPerBlock = newMaxToPoolPerBlock;
   }
 
   /**
