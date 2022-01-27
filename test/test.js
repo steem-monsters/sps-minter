@@ -15,7 +15,7 @@ describe("Minter", async function () {
     await testToken.deployed();
 
     let currentBlockNumber = await ethers.provider.getBlockNumber()
-    const Minter = await hre.ethers.getContractFactory("Minter");
+    const Minter = await hre.ethers.getContractFactory("SPSMinter");
     minter = await Minter.deploy(testToken.address, currentBlockNumber + 1, accounts[0].address, 1000000000000000);
     await minter.deployed();
   }

@@ -12,13 +12,13 @@ contract SPSMinter {
   /// @notice Address that can change pools
   address public admin;
   /// @notice Address of the token to mint
-  address public token;
+  IMintable public token;
   /// @notice Block number when mint() was last called
   uint256 public lastMintBlock;
   /// @notice Total number of tokens already minted
   uint256 public totalMinted;
   /// @notice Maximum number of tokens minted, 3B (with 18 decimal places)
-  uint256 public cap = 3000000000000000000000000000;
+  uint256 constant public cap = 3000000000000000000000000000;
   /// @notice Maximum number of pools
   uint256 constant public poolsCap = 100;
   /// @notice Maximum amount per block to each pool
@@ -63,7 +63,7 @@ contract SPSMinter {
     require(newToken != address(0), 'Token cannot be address 0');
     require(newAdmin != address(0), 'Admin cannot be address 0');
 
-    token = newToken;
+    token = IMintable(newToken);
     lastMintBlock = startBlock;
     admin = newAdmin;
     maxToPoolPerBlock = newMaxToPoolPerBlock;
@@ -87,7 +87,7 @@ contract SPSMinter {
       }
 
       totalMinted = totalMinted + amount;
-      IMintable(token).mint(pools[i].receiver, amount);
+      token.mint(pools[i].receiver, amount);
 
       emit Mint(pools[i].receiver, amount);
     }
