@@ -77,7 +77,7 @@ contract Minter {
    */
   function mint() public {
     require(totalMinted != cap, "Cap reached");
-    
+
     uint256 mintDifference = block.number - lastMintBlock;
 
     for (uint256 i = 0; i < pools.length; i++){
@@ -86,8 +86,6 @@ contract Minter {
       if(totalMinted + amount >= cap){
         amount = cap - totalMinted;
       }
-
-      require(totalMinted + amount <= cap, "Cap reached");
 
       totalMinted = totalMinted + amount;
       IMintable(token).mint(pools[i].receiver, amount);
