@@ -105,7 +105,7 @@ describe("Minter", async function () {
     let add = await minter.addPool(accounts[0].address, '3000000000000000000000000000');
     await add.wait();
 
-    await mineBlocks(10)
+    await mineBlocks(20)
 
     let mint = await minter.mint();
     await mint.wait();
@@ -113,6 +113,17 @@ describe("Minter", async function () {
     let getSupply = await testToken.totalSupply()
 
     expect(getSupply.toString()).to.equal('3000000000000000000000000000')
+  });
+
+  it("should revert if cap was reached in previous transaction", async function () {
+    await mineBlocks(20)
+
+    try {
+      let mint = await minter.mint();
+      await mint.wait();
+    } catch (e) {
+      expect(e.message).to.equal("VM Exception while processing transaction: reverted with reason string 'Cap reached'")
+    }
   });
 
   it("should mint 0 tokens if 0 blocks elapsed", async function () {

@@ -76,14 +76,17 @@ contract Minter {
    * @notice Mint tokens to all pools, can be called by anyone
    */
   function mint() public {
+    require(totalMinted != cap, "Cap reached");
+    
     uint256 mintDifference = block.number - lastMintBlock;
 
     for (uint256 i = 0; i < pools.length; i++){
       uint256 amount = pools[i].amountPerBlock * mintDifference;
 
-      if(totalMinted + amount >= cap && totalMinted != cap){
+      if(totalMinted + amount >= cap){
         amount = cap - totalMinted;
       }
+
       require(totalMinted + amount <= cap, "Cap reached");
 
       totalMinted = totalMinted + amount;
