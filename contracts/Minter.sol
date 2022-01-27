@@ -96,8 +96,8 @@ contract SPSMinter {
         amount = cap - totalMinted;
       }
 
-      totalMinted = totalMinted + amount;
       token.mint(pools[i].receiver, amount);
+      totalMinted = totalMinted + amount;
 
       emit Mint(pools[i].receiver, amount);
     }
