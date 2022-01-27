@@ -43,6 +43,8 @@ contract Minter {
   event PoolRemoved(uint256 index, address receiver, uint256 amount);
   /// @notice Emitted when admin address is updated
   event UpdateAdmin(address admin, address newAdmin);
+  /// @notice Emitted when maxToPoolPerBlock is changed
+  event UpdateMaxToPoolPerBlock(uint256 oldMaxToPoolPerBlock, uint256 newMaxToPoolPerBlock);
 
   /// @notice Modifier to allow only admin to call certain functions
   modifier onlyAdmin(){
@@ -146,6 +148,8 @@ contract Minter {
    * @param newMaxToPoolPerBlock maximum number of token that is allowed to be minted per block
    */
   function updateMaxPerBlock(uint256 newMaxToPoolPerBlock) external onlyAdmin {
+    emit UpdateMaxToPoolPerBlock(maxToPoolPerBlock, newMaxToPoolPerBlock);
+
     maxToPoolPerBlock = newMaxToPoolPerBlock;
   }
 
