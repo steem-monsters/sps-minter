@@ -33,15 +33,15 @@ contract SPSMinter {
   Pool[] public pools;
 
   /// @notice Emitted when mint() is called
-  event Mint(address receiver, uint256 amount);
+  event Mint(address indexed receiver, uint256 amount);
   /// @notice Emitted when pool is added
-  event PoolAdded(address newReceiver, uint256 newAmount);
+  event PoolAdded(address indexed newReceiver, uint256 newAmount);
   /// @notice Emitted when pool is updated
-  event PoolUpdated(uint256 index, address newReceiver, uint256 newAmount);
+  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount);
   /// @notice Emitted when pool is removed
-  event PoolRemoved(uint256 index, address receiver, uint256 amount);
+  event PoolRemoved(uint256 index, address indexed receiver, uint256 amount);
   /// @notice Emitted when admin address is updated
-  event UpdateAdmin(address admin, address newAdmin);
+  event UpdateAdmin(address indexed admin, address indexed newAdmin);
   /// @notice Emitted when maxToPoolPerBlock is changed
   event UpdateMaxToPoolPerBlock(uint256 oldMaxToPoolPerBlock, uint256 newMaxToPoolPerBlock);
 
