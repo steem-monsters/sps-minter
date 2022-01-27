@@ -3,6 +3,7 @@ pragma solidity ^0.8.11;
 
 interface IMintable {
   function mint(address to, uint256 amount) external;
+  function decimals() external returns (uint256);
 }
 
 /// @title A Minter contract for Splinterlands
@@ -67,6 +68,8 @@ contract SPSMinter {
     lastMintBlock = startBlock;
     admin = newAdmin;
     maxToPoolPerBlock = newMaxToPoolPerBlock;
+
+    require(token.decimals() == 18, "SPSMinter: Token doesn't have 18 decimals");
 
     emit UpdateAdmin(address(0), newAdmin);
   }
