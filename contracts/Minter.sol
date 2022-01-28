@@ -137,7 +137,9 @@ contract SPSMinter {
     mint();
     emit PoolRemoved(index, pools[index].receiver, pools[index].amountPerBlock);
 
-    pools[index] = pools[pools.length - 1];
+    unchecked {
+      pools[index] = pools[pools.length - 1];
+    }
     pools.pop();
   }
 
