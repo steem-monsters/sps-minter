@@ -72,6 +72,7 @@ contract SPSMinter {
     require(token.decimals() == 18, "SPSMinter: Token doesn't have 18 decimals");
 
     emit UpdateAdmin(address(0), newAdmin);
+    emit UpdateMaxToPoolPerBlock(0, newMaxToPoolPerBlock);
   }
 
   /**
