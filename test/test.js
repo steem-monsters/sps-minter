@@ -96,7 +96,7 @@ describe("Minter", async function () {
     expect(getSupply.toNumber()).to.equal(0)
   });
 
-  it("should mint 0 tokens if cap is reached", async function () {
+  it("should mint 0 additional tokens if cap is reached", async function () {
     await init()
 
     let updateMax = await minter.updateMaxPerBlock('3000000000000000000000000000')
@@ -184,7 +184,30 @@ describe("Minter", async function () {
     expect(balance_1.toNumber()).to.equal(getPool_1.amountPerBlock.toNumber() * (endLastMintBlock - startLastMintBlock))
     expect(balance_2.toNumber()).to.equal(getPool_2.amountPerBlock.toNumber() * (endLastMintBlock - startLastMintBlock))
   });
+
+  it("should add pool with 0 emission and mint 0 tokens to it after 10 blocks", async function () {
+    let add = await minter.addPool(accounts[2].address, 0);
+    await add.wait();
+
+    let getPool = await minter.getPool(2);
+
+    expect(getPool.receiver).to.equal(accounts[2].address)
+    expect(getPool.amountPerBlock.toNumber()).to.equal(0)
+
+    //mint
+    let startLastMintBlock = await minter.lastMintBlock()
+    await mineBlocks(10)
+
+    let mint = await minter.mint();
+    await mint.wait();
+
+    let endLastMintBlock = await minter.lastMintBlock()
+    let balance = await testToken.balanceOf(accounts[2].address)
+
+    expect(balance.toNumber()).to.equal(0)
+  });
 });
+
 
 async function mineBlocks(blockNumber) {
   while (blockNumber > 0) {
