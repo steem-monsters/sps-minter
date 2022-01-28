@@ -100,7 +100,9 @@ contract SPSMinter {
       }
 
       token.mint(pools[i].receiver, amount);
-      totalMinted = totalMinted + amount;
+      unchecked {
+        totalMinted = totalMinted + amount;
+      }
 
       emit Mint(pools[i].receiver, amount);
     }
