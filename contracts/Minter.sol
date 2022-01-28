@@ -94,7 +94,9 @@ contract SPSMinter {
       uint256 amount = pools[i].amountPerBlock * mintDifference;
 
       if(totalMinted + amount >= cap){
-        amount = cap - totalMinted;
+        unchecked {
+          amount = cap - totalMinted;
+        }
       }
 
       token.mint(pools[i].receiver, amount);
