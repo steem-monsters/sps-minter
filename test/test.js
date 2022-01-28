@@ -144,6 +144,46 @@ describe("Minter", async function () {
 
     expect(getSupply.toString()).to.equal("1000")
   });
+
+  it("should add multiple pools", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1);
+    await add.wait();
+
+    let add_2 = await minter.addPool(accounts[1].address, 5);
+    await add_2.wait();
+
+    let getPool_1 = await minter.getPool(0);
+    let getPool_2 = await minter.getPool(1);
+
+    let getPoolLength = await minter.getPoolLength();
+
+    expect(getPool_1.receiver).to.equal(accounts[0].address)
+    expect(getPool_1.amountPerBlock.toNumber()).to.equal(1)
+    expect(getPool_2.receiver).to.equal(accounts[1].address)
+    expect(getPool_2.amountPerBlock.toNumber()).to.equal(5)
+    expect(getPoolLength.toNumber()).to.equal(2)
+  });
+
+  it("should mint tokens to multiple pools", async function () {
+    let startLastMintBlock = await minter.lastMintBlock()
+    await mineBlocks(10)
+
+    let mint = await minter.mint();
+    await mint.wait();
+
+    let endLastMintBlock = await minter.lastMintBlock()
+
+    let balance_1 = await testToken.balanceOf(accounts[0].address)
+    let getPool_1 = await minter.getPool(0);
+
+    let balance_2 = await testToken.balanceOf(accounts[0].address)
+    let getPool_2 = await minter.getPool(0);
+
+    expect(balance_1.toNumber()).to.equal(getPool_1.amountPerBlock.toNumber() * (endLastMintBlock - startLastMintBlock))
+    expect(balance_2.toNumber()).to.equal(getPool_2.amountPerBlock.toNumber() * (endLastMintBlock - startLastMintBlock))
+  });
 });
 
 async function mineBlocks(blockNumber) {
