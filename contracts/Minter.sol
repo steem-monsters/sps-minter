@@ -79,7 +79,7 @@ contract SPSMinter {
    * @notice Mint tokens to all pools, can be called by anyone
    */
   function mint() public {
-    require(totalMinted != cap, "SPSMinter: Cap reached");
+    require(totalMinted < cap, "SPSMinter: Cap reached");
     require(block.number > lastMintBlock, "SPSMinter: Mint block not yet reached");
 
 
