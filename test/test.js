@@ -61,6 +61,19 @@ describe("Minter", async function () {
     expect(getPoolLength.toNumber()).to.equal(1)
   });
 
+  it("should fail when removing invalid pool if there are pools", async function () {
+    try {
+      let remove = await minter.removePool(1);
+      await remove.wait();
+    } catch (e){
+      expect(e.message).to.equal("VM Exception while processing transaction: reverted with reason string 'Index is not valid'")
+    }
+
+    let getPoolLength = await minter.getPoolLength();
+
+    expect(getPoolLength.toNumber()).to.equal(1)
+  });
+
   it("should remove pool", async function () {
     let remove = await minter.removePool(0);
     await remove.wait();
@@ -76,7 +89,7 @@ describe("Minter", async function () {
     expect(getPoolLength.toNumber()).to.equal(0)
   });
 
-  it("should fail when removing invalid pool", async function () {
+  it("should fail when removing invalid pool if there are no pools", async function () {
     try {
       let remove = await minter.removePool(1);
       await remove.wait();
