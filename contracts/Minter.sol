@@ -138,6 +138,8 @@ contract SPSMinter {
    * @param index Index in the array of the pool
    */
   function removePool(uint256 index) external onlyAdmin {
+    require(pools.length > index, 'Index is not valid');
+
     mint();
     emit PoolRemoved(index, pools[index].receiver, pools[index].amountPerBlock);
 
