@@ -3,11 +3,10 @@ const hre = require("hardhat");
 let newToken = ''
 let startBlock = ''
 let newAdmin = ''
-let maxPerBlock = ''
 
 async function main() {
   const Minter = await hre.ethers.getContractFactory("Minter");
-  const minter = await Minter.deploy(newToken, startBlock, newAdmin, maxPerBlock);
+  const minter = await Minter.deploy(newToken, startBlock, newAdmin);
 
   await minter.deployed();
 
