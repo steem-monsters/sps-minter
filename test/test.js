@@ -16,7 +16,7 @@ describe("Minter", async function () {
 
     let currentBlockNumber = await ethers.provider.getBlockNumber()
     const Minter = await hre.ethers.getContractFactory("SPSMinter");
-    minter = await Minter.deploy(testToken.address, currentBlockNumber + 1, accounts[0].address, 1000000000000000);
+    minter = await Minter.deploy(testToken.address, currentBlockNumber + 1, accounts[0].address);
     await minter.deployed();
   }
 
@@ -120,25 +120,6 @@ describe("Minter", async function () {
     let getSupply = await testToken.totalSupply()
 
     expect(getSupply.toNumber()).to.equal(0)
-  });
-
-  it("should mint 0 additional tokens if cap is reached", async function () {
-    await init()
-
-    let updateMax = await minter.updateMaxPerBlock('3000000000000000000000000000')
-    await updateMax.wait();
-
-    let add = await minter.addPool(accounts[0].address, '3000000000000000000000000000');
-    await add.wait();
-
-    await mineBlocks(20)
-
-    let mint = await minter.mint();
-    await mint.wait();
-
-    let getSupply = await testToken.totalSupply()
-
-    expect(getSupply.toString()).to.equal('3000000000000000000000000000')
   });
 
   it("should revert if cap was reached in previous transaction", async function () {
