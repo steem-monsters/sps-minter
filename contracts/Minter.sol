@@ -43,8 +43,6 @@ contract SPSMinter {
   event PoolRemoved(uint256 index, address indexed receiver, uint256 amount);
   /// @notice Emitted when admin address is updated
   event UpdateAdmin(address indexed admin, address indexed newAdmin);
-  /// @notice Emitted when maxToPoolPerBlock is changed
-  event UpdateMaxToPoolPerBlock(uint256 oldMaxToPoolPerBlock, uint256 newMaxToPoolPerBlock);
 
   /// @notice Modifier to allow only admin to call certain functions
   modifier onlyAdmin(){
@@ -57,9 +55,8 @@ contract SPSMinter {
    * @param newToken Address of the token to mint
    * @param startBlock Initial lastMint block
    * @param newAdmin Initial admin address
-   * @param newMaxToPoolPerBlock Maximum amount minted per block
    */
-  constructor(address newToken, uint256 startBlock, address newAdmin, uint256 newMaxToPoolPerBlock){
+  constructor(address newToken, uint256 startBlock, address newAdmin){
     require(startBlock >= block.number, "SPSMinter: Start block must be above current block");
     require(newToken != address(0), 'SPSMinter: Token cannot be address 0');
     require(newAdmin != address(0), 'SPSMinter: Admin cannot be address 0');
@@ -67,12 +64,10 @@ contract SPSMinter {
     token = IMintable(newToken);
     lastMintBlock = startBlock;
     admin = newAdmin;
-    maxToPoolPerBlock = newMaxToPoolPerBlock;
 
     require(token.decimals() == 18, "SPSMinter: Token doesn't have 18 decimals");
 
     emit UpdateAdmin(address(0), newAdmin);
-    emit UpdateMaxToPoolPerBlock(0, newMaxToPoolPerBlock);
   }
 
   /**
