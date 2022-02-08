@@ -23,7 +23,7 @@ contract SPSMinter {
   /// @notice Maximum number of pools
   uint256 constant public poolsCap = 100;
   /// @notice Maximum amount per block to each pool
-  uint256 public maxToPoolPerBlock;
+  uint256 public maxToPoolPerBlock = 50000000000000000000;
 
   /// @notice Struct to store information about each pool
   struct Pool {
@@ -156,16 +156,6 @@ contract SPSMinter {
   function updateAdmin(address newAdmin) external onlyAdmin {
     emit UpdateAdmin(admin, newAdmin);
     admin = newAdmin;
-  }
-
-  /**
-   * @notice Update maximum amount that can be created per block
-   * @param newMaxToPoolPerBlock maximum number of token that is allowed to be minted per block
-   */
-  function updateMaxPerBlock(uint256 newMaxToPoolPerBlock) external onlyAdmin {
-    emit UpdateMaxToPoolPerBlock(maxToPoolPerBlock, newMaxToPoolPerBlock);
-
-    maxToPoolPerBlock = newMaxToPoolPerBlock;
   }
 
   /**
