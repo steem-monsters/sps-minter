@@ -19,11 +19,11 @@ contract SPSMinter {
   /// @notice Total number of tokens already minted
   uint256 public totalMinted;
   /// @notice Maximum number of tokens minted, 3B (with 18 decimal places)
-  uint256 constant public cap = 3000000000000000000000000000;
+  uint256 constant public cap = 3000000000 ether;
   /// @notice Maximum number of pools
   uint256 constant public poolsCap = 100;
   /// @notice Maximum amount per block to each pool
-  uint256 public maxToPoolPerBlock = 50000000000000000000;
+  uint256 public maxToPoolPerBlock = 50 ether;
 
   /// @notice Struct to store information about each pool
   struct Pool {
