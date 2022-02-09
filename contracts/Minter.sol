@@ -13,7 +13,7 @@ contract SPSMinter {
   /// @notice Address that can change pools
   address public admin;
   /// @notice Address of the token to mint
-  IMintable public token;
+  IMintable public immutable token;
   /// @notice Block number when mint() was last called
   uint256 public lastMintBlock;
   /// @notice Total number of tokens already minted
