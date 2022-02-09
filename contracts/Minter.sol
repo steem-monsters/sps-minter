@@ -109,7 +109,7 @@ contract SPSMinter {
    * @param newAmount Amount of tokens per block
    */
   function addPool(address newReceiver, uint256 newAmount) external onlyAdmin {
-    require(pools.length <= poolsCap, 'SPSMinter: Pools cap reached');
+    require(pools.length < poolsCap, 'SPSMinter: Pools cap reached');
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
     pools.push(Pool(newReceiver, newAmount));
     emit PoolAdded(newReceiver, newAmount);
