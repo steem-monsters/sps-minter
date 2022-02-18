@@ -23,7 +23,7 @@ contract SPSMinter {
   /// @notice Maximum number of pools
   uint256 constant public poolsCap = 100;
   /// @notice Maximum amount per block to each pool
-  uint256 public maxToPoolPerBlock = 50 ether;
+  uint256 constant public maxToPoolPerBlock = 50 ether;
 
   /// @notice Struct to store information about each pool
   struct Pool {
