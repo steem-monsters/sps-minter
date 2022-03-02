@@ -2,7 +2,13 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.1",
     "chai": "^4.3.4",
+    "compile": "^0.0.2",
     "hardhat": "^2.8.0"
+  },
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.3"
