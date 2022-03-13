@@ -81,7 +81,7 @@ contract SPSMinter {
   function mint() public {
     require(totalMinted < cap, "SPSMinter: Cap reached");
     require(block.number > lastMintBlock, "SPSMinter: Mint block not yet reached");
-
+    updateEmissions(0, true);
 
     uint256 mintDifference;
     unchecked {
