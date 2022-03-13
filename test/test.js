@@ -23,14 +23,14 @@ describe("Minter", async function () {
   it("should add pool", async function () {
     await init()
 
-    let add = await minter.addPool(accounts[0].address, 1);
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
     await add.wait();
 
     let getPool = await minter.getPool(0);
     let getPoolLength = await minter.getPoolLength();
 
     expect(getPool.receiver).to.equal(accounts[0].address)
-    expect(getPool.amountPerBlock.toNumber()).to.equal(1)
+    expect(getPool.amountPerBlock.toNumber()).to.equal(1000000)
     expect(getPoolLength.toNumber()).to.equal(1)
   });
 
@@ -50,15 +50,32 @@ describe("Minter", async function () {
   });
 
   it("should update pool", async function () {
-    let update = await minter.updatePool(0, accounts[0].address, 10);
+    let update = await minter.updatePool(0, accounts[0].address, 10000000, 50, 1);
     await update.wait();
 
     let getPool = await minter.getPool(0);
     let getPoolLength = await minter.getPoolLength();
 
     expect(getPool.receiver).to.equal(accounts[0].address)
-    expect(getPool.amountPerBlock.toNumber()).to.equal(10)
+    expect(getPool.amountPerBlock.toNumber()).to.equal(10000000)
     expect(getPoolLength.toNumber()).to.equal(1)
+  });
+
+  it("should mint tokens after reduction", async function () {
+    let startLastMintBlock = await minter.lastMintBlock()
+    await mineBlocks(60)
+
+    let balanceBefore = await testToken.balanceOf(accounts[0].address)
+
+    let mint = await minter.mint();
+    await mint.wait();
+
+    let endLastMintBlock = await minter.lastMintBlock()
+
+    let balance = await testToken.balanceOf(accounts[0].address)
+    let getPool = await minter.getPool(0);
+
+    expect(balance.toNumber() - balanceBefore.toNumber()).to.equal(getPool.amountPerBlock.toNumber() * (endLastMintBlock - startLastMintBlock))
   });
 
   it("should fail when removing invalid pool if there are pools", async function () {
@@ -139,7 +156,7 @@ describe("Minter", async function () {
 
     let lastBlock = await minter.lastMintBlock()
 
-    await minter.addPool(accounts[0].address, '1000');
+    await minter.addPool(accounts[0].address, '1000000', 50, 1);
     await minter.mint(); //mine for the first time
     await minter.mint(); //should mine 0 tokens, since it's in the same block
 
@@ -149,16 +166,16 @@ describe("Minter", async function () {
 
     await network.provider.send("evm_setAutomine", [true]);
 
-    expect(getSupply.toString()).to.equal("1000")
+    expect(getSupply.toString()).to.equal("1000000")
   });
 
   it("should add multiple pools", async function () {
     await init()
 
-    let add = await minter.addPool(accounts[0].address, 1);
+    let add = await minter.addPool(accounts[0].address, 10000000, 50, 1);
     await add.wait();
 
-    let add_2 = await minter.addPool(accounts[1].address, 5);
+    let add_2 = await minter.addPool(accounts[1].address, 50000000, 50, 1);
     await add_2.wait();
 
     let getPool_1 = await minter.getPool(0);
@@ -167,9 +184,9 @@ describe("Minter", async function () {
     let getPoolLength = await minter.getPoolLength();
 
     expect(getPool_1.receiver).to.equal(accounts[0].address)
-    expect(getPool_1.amountPerBlock.toNumber()).to.equal(1)
+    expect(getPool_1.amountPerBlock.toNumber()).to.equal(10000000)
     expect(getPool_2.receiver).to.equal(accounts[1].address)
-    expect(getPool_2.amountPerBlock.toNumber()).to.equal(5)
+    expect(getPool_2.amountPerBlock.toNumber()).to.equal(50000000)
     expect(getPoolLength.toNumber()).to.equal(2)
   });
 
@@ -193,7 +210,7 @@ describe("Minter", async function () {
   });
 
   it("should add pool with 0 emission and mint 0 tokens to it after 10 blocks", async function () {
-    let add = await minter.addPool(accounts[2].address, 0);
+    let add = await minter.addPool(accounts[2].address, 0, 50000000, 1);
     await add.wait();
 
     let getPool = await minter.getPool(2);
@@ -212,6 +229,119 @@ describe("Minter", async function () {
     let balance = await testToken.balanceOf(accounts[2].address)
 
     expect(balance.toNumber()).to.equal(0)
+  });
+
+  it("should update emission of one pool by index", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
+    await add.wait();
+
+    await mineBlocks(60);
+
+    await (await minter.updateEmissions(0, false)).wait()
+
+    let pool = await minter.getPool(0)
+
+    expect(pool.amountPerBlock.toNumber()).to.equal(1000000 * 0.99)
+  });
+
+  it("should not update emission of one pool by index if it's not the time yet", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
+    await add.wait();
+
+    await mineBlocks(60);
+
+    await (await minter.updateEmissions(0, false)).wait()
+    await (await minter.updateEmissions(0, false)).wait()
+    await (await minter.updateEmissions(0, false)).wait()
+
+    let pool = await minter.getPool(0)
+
+    expect(pool.amountPerBlock.toNumber()).to.equal(1000000 * 0.99)
+  });
+
+  it("should update emission of one pool by index if enough time has passed", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
+    await add.wait();
+
+    await mineBlocks(60);
+
+    await (await minter.updateEmissions(0, false)).wait()
+    await mineBlocks(60);
+    await (await minter.updateEmissions(0, false)).wait()
+
+    let pool = await minter.getPool(0)
+
+    expect(pool.amountPerBlock.toNumber()).to.equal(980100)
+  });
+
+  it("should update emission of all pools", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
+    await add.wait();
+
+    let add2 = await minter.addPool(accounts[0].address, 2000000, 50, 1);
+    await add2.wait();
+
+    await mineBlocks(60);
+
+    await (await minter.updateEmissions(0, true)).wait()
+
+    let pool = await minter.getPool(0)
+    let pool2 = await minter.getPool(1)
+
+    expect(pool.amountPerBlock.toNumber()).to.equal(1000000 * 0.99)
+    expect(pool2.amountPerBlock.toNumber()).to.equal(2000000 * 0.99)
+  });
+
+  it("should not update emission of all pools if it's not the time yet", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
+    await add.wait();
+
+    let add2 = await minter.addPool(accounts[0].address, 2000000, 50, 1);
+    await add2.wait();
+
+    await mineBlocks(60);
+
+    await (await minter.updateEmissions(0, true)).wait()
+    await (await minter.updateEmissions(0, true)).wait()
+    await (await minter.updateEmissions(0, true)).wait()
+
+    let pool = await minter.getPool(0)
+    let pool2 = await minter.getPool(1)
+
+    expect(pool.amountPerBlock.toNumber()).to.equal(1000000 * 0.99)
+    expect(pool2.amountPerBlock.toNumber()).to.equal(2000000 * 0.99)
+  });
+
+  it("should update emission of all pools if enough time has passed", async function () {
+    await init()
+
+    let add = await minter.addPool(accounts[0].address, 1000000, 50, 1);
+    await add.wait();
+
+    let add2 = await minter.addPool(accounts[0].address, 2000000, 50, 1);
+    await add2.wait();
+
+    await mineBlocks(60);
+
+    await (await minter.updateEmissions(0, true)).wait()
+    await mineBlocks(60);
+    await (await minter.updateEmissions(0, true)).wait()
+
+    let pool = await minter.getPool(0)
+    let pool2 = await minter.getPool(1)
+
+    expect(pool.amountPerBlock.toNumber()).to.equal((1000000 * 0.99) * 0.99)
+    expect(pool2.amountPerBlock.toNumber()).to.equal((2000000 * 0.99) * 0.99)
   });
 });
 
