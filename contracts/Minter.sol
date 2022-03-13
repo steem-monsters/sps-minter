@@ -6,6 +6,8 @@ interface IMintable {
   function decimals() external returns (uint256);
 }
 
+import "hardhat/console.sol";
+
 /// @title A Minter contract for Splinterlands
 /// @author Splinterlands Team (@fbslo)
 
@@ -29,6 +31,9 @@ contract SPSMinter {
   struct Pool {
     address receiver;
     uint256 amountPerBlock;
+    uint256 reductionBlocks;
+    uint256 reductionPercentage;
+    uint256 lastUpdate;
   }
   /// @notice Array to store all pools
   Pool[] public pools;
@@ -36,9 +41,9 @@ contract SPSMinter {
   /// @notice Emitted when mint() is called
   event Mint(address indexed receiver, uint256 amount);
   /// @notice Emitted when pool is added
-  event PoolAdded(address indexed newReceiver, uint256 newAmount);
+  event PoolAdded(address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage, uint256 newLastUpdate);
   /// @notice Emitted when pool is updated
-  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount);
+  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage, uint256 newLastUpdate);
   /// @notice Emitted when pool is removed
   event PoolRemoved(uint256 index, address indexed receiver, uint256 amount);
   /// @notice Emitted when admin address is updated
@@ -85,7 +90,8 @@ contract SPSMinter {
 
     lastMintBlock = block.number;
 
-    for (uint256 i = 0; i < pools.length; i++){
+    uint256 poolsLength = pools.length;
+    for (uint256 i = 0; i < poolsLength;){
       uint256 amount = pools[i].amountPerBlock * mintDifference;
 
       if(totalMinted + amount >= cap){
@@ -100,6 +106,8 @@ contract SPSMinter {
       token.mint(pools[i].receiver, amount);
 
       emit Mint(pools[i].receiver, amount);
+
+      unchecked { ++i; }
     }
   }
 
@@ -107,12 +115,14 @@ contract SPSMinter {
    * @notice Add new pool, can be called by admin
    * @param newReceiver Address of the receiver
    * @param newAmount Amount of tokens per block
+   * @param newReductionBlocks Number of blocks between emission reduction
+   * @param newReductionPercentage Percentage to reduce emission
    */
-  function addPool(address newReceiver, uint256 newAmount) external onlyAdmin {
+  function addPool(address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage) external onlyAdmin {
     require(pools.length < poolsCap, 'SPSMinter: Pools cap reached');
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
-    pools.push(Pool(newReceiver, newAmount));
-    emit PoolAdded(newReceiver, newAmount);
+    pools.push(Pool(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number));
+    emit PoolAdded(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
   }
 
   /**
@@ -120,12 +130,38 @@ contract SPSMinter {
    * @param index Index in the array of the pool
    * @param newReceiver Address of the receiver
    * @param newAmount Amount of tokens per block
+   * @param newReductionBlocks Number of blocks between emission reduction
+   * @param newReductionPercentage Percentage to reduce emission
    */
-  function updatePool(uint256 index, address newReceiver, uint256 newAmount) external onlyAdmin {
+  function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage) external onlyAdmin {
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
     mint();
-    pools[index] = Pool(newReceiver, newAmount);
-    emit PoolUpdated(index, newReceiver, newAmount);
+    pools[index] = Pool(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
+    emit PoolUpdated(index, newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
+  }
+
+  /**
+   * @notice Update emissions for pools
+   * @param index Index in the array of the pool
+   * @param updateAll If true, all pools will be updated
+   */
+  function updateEmissions(uint256 index, bool updateAll) external {
+    if (updateAll){
+      uint256 length = pools.length;
+      for (uint256 i = 0; i < length;){
+        if (block.number - pools[i].lastUpdate > pools[i].reductionBlocks){
+          pools[i].amountPerBlock = pools[i].amountPerBlock / 100 * (100 - pools[i].reductionPercentage);
+          pools[i].lastUpdate = block.number;
+        }
+
+        unchecked { ++i; }
+      }
+    } else {
+      if (block.number - pools[index].lastUpdate > pools[index].reductionBlocks){
+        pools[index].amountPerBlock = pools[index].amountPerBlock / 10000 * (10000 - (pools[index].reductionPercentage * 100));
+        pools[index].lastUpdate = block.number;
+      }
+    }
   }
 
   /**
