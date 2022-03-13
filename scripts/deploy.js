@@ -1,11 +1,11 @@
 const hre = require("hardhat");
 
-let newToken = ''
-let startBlock = ''
-let newAdmin = ''
+let newToken = '0x1633b7157e7638C4d6593436111Bf125Ee74703F'
+let startBlock = '15490000'
+let newAdmin = '0xdf5Fd6B21E0E7aC559B41Cf2597126B3714f432C'
 
 async function main() {
-  const Minter = await hre.ethers.getContractFactory("Minter");
+  const Minter = await hre.ethers.getContractFactory("SPSMinter");
   const minter = await Minter.deploy(newToken, startBlock, newAdmin);
 
   await minter.deployed();
