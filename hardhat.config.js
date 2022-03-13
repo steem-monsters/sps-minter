@@ -7,5 +7,11 @@ require("@nomiclabs/hardhat-ethers");
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.11"
+  solidity: "0.8.11",
+  networks: {
+    // bsc: {
+    //   url: "https://bsc-dataseed.binance.org/",
+    //   accounts: [""]
+    // }
+  }
 };
