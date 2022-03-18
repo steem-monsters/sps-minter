@@ -143,7 +143,7 @@ contract SPSMinter {
    * @param index Index in the array of the pool
    * @param updateAll If true, all pools will be updated
    */
-  function updateEmissions(uint256 index, bool updateAll) external {
+  function updateEmissions(uint256 index, bool updateAll) public {
     if (updateAll){
       uint256 length = pools.length;
       for (uint256 i = 0; i < length;){
