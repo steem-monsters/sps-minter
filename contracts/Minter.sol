@@ -6,8 +6,6 @@ interface IMintable {
   function decimals() external returns (uint256);
 }
 
-import "hardhat/console.sol";
-
 /// @title A Minter contract for Splinterlands
 /// @author Splinterlands Team (@fbslo)
 
