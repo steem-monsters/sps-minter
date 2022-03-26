@@ -79,7 +79,7 @@ contract SPSMinter {
   function mint() public {
     require(totalMinted < cap, "SPSMinter: Cap reached");
     require(block.number > lastMintBlock, "SPSMinter: Mint block not yet reached");
-    updateEmissions(0, true);
+    updateAllEmissions();
 
     uint256 mintDifference;
     unchecked {
@@ -139,26 +139,24 @@ contract SPSMinter {
   }
 
   /**
-   * @notice Update emissions for pools
+   * @notice Update emissions for one pool
    * @param index Index in the array of the pool
-   * @param updateAll If true, all pools will be updated
    */
-  function updateEmissions(uint256 index, bool updateAll) public {
-    if (updateAll){
-      uint256 length = pools.length;
-      for (uint256 i = 0; i < length;){
-        if (block.number - pools[i].lastUpdate > pools[i].reductionBlocks){
-          pools[i].amountPerBlock = pools[i].amountPerBlock / 100 * (100 - pools[i].reductionPercentage);
-          pools[i].lastUpdate = block.number;
-        }
+  function updateEmissions(uint256 index) public {
+    if (block.number - pools[index].lastUpdate > pools[index].reductionBlocks){
+      pools[index].amountPerBlock = pools[index].amountPerBlock / 10000 * (10000 - (pools[index].reductionPercentage * 100));
+      pools[index].lastUpdate = block.number;
+    }
+  }
 
-        unchecked { ++i; }
-      }
-    } else {
-      if (block.number - pools[index].lastUpdate > pools[index].reductionBlocks){
-        pools[index].amountPerBlock = pools[index].amountPerBlock / 10000 * (10000 - (pools[index].reductionPercentage * 100));
-        pools[index].lastUpdate = block.number;
-      }
+  /**
+   * @notice Update emissions for all pools
+   */
+  function updateAllEmissions() public {
+    uint256 length = pools.length;
+    for (uint256 i = 0; i < length;){
+      updateEmissions(i);
+      unchecked { ++i; }
     }
   }
 

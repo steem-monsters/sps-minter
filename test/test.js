@@ -239,7 +239,7 @@ describe("Minter", async function () {
 
     await mineBlocks(60);
 
-    await (await minter.updateEmissions(0, false)).wait()
+    await (await minter.updateEmissions(0)).wait()
 
     let pool = await minter.getPool(0)
 
@@ -254,9 +254,9 @@ describe("Minter", async function () {
 
     await mineBlocks(60);
 
-    await (await minter.updateEmissions(0, false)).wait()
-    await (await minter.updateEmissions(0, false)).wait()
-    await (await minter.updateEmissions(0, false)).wait()
+    await (await minter.updateEmissions(0)).wait()
+    await (await minter.updateEmissions(0)).wait()
+    await (await minter.updateEmissions(0)).wait()
 
     let pool = await minter.getPool(0)
 
@@ -271,9 +271,9 @@ describe("Minter", async function () {
 
     await mineBlocks(60);
 
-    await (await minter.updateEmissions(0, false)).wait()
+    await (await minter.updateEmissions(0)).wait()
     await mineBlocks(60);
-    await (await minter.updateEmissions(0, false)).wait()
+    await (await minter.updateEmissions(0)).wait()
 
     let pool = await minter.getPool(0)
 
@@ -291,7 +291,7 @@ describe("Minter", async function () {
 
     await mineBlocks(60);
 
-    await (await minter.updateEmissions(0, true)).wait()
+    await (await minter.updateAllEmissions()).wait()
 
     let pool = await minter.getPool(0)
     let pool2 = await minter.getPool(1)
@@ -311,9 +311,9 @@ describe("Minter", async function () {
 
     await mineBlocks(60);
 
-    await (await minter.updateEmissions(0, true)).wait()
-    await (await minter.updateEmissions(0, true)).wait()
-    await (await minter.updateEmissions(0, true)).wait()
+    await (await minter.updateAllEmissions()).wait()
+    await (await minter.updateAllEmissions()).wait()
+    await (await minter.updateAllEmissions()).wait()
 
     let pool = await minter.getPool(0)
     let pool2 = await minter.getPool(1)
@@ -333,9 +333,9 @@ describe("Minter", async function () {
 
     await mineBlocks(60);
 
-    await (await minter.updateEmissions(0, true)).wait()
+    await (await minter.updateAllEmissions()).wait()
     await mineBlocks(60);
-    await (await minter.updateEmissions(0, true)).wait()
+    await (await minter.updateAllEmissions()).wait()
 
     let pool = await minter.getPool(0)
     let pool2 = await minter.getPool(1)
