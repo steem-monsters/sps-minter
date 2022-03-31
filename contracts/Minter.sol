@@ -104,7 +104,7 @@ contract SPSMinter {
         totalMinted = totalMinted + amount;
       }
 
-      if (totalMinted > 0){
+      if (amount > 0){
         token.mint(pools[i].receiver, amount);
         emit Mint(pools[i].receiver, amount);
       }
