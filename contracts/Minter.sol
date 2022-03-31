@@ -32,7 +32,7 @@ contract SPSMinter {
     address receiver;
     uint256 amountPerBlock;
     uint256 reductionBlocks;
-    uint256 reductionPercentage;
+    uint256 reductionBps;
     uint256 lastUpdate;
   }
   /// @notice Array to store all pools
@@ -43,7 +43,7 @@ contract SPSMinter {
   /// @notice Emitted when pool is added
   event PoolAdded(address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage, uint256 newLastUpdate);
   /// @notice Emitted when pool is updated
-  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage, uint256 newLastUpdate);
+  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate);
   /// @notice Emitted when pool is removed
   event PoolRemoved(uint256 index, address indexed receiver, uint256 amount);
   /// @notice Emitted when admin address is updated
@@ -118,13 +118,14 @@ contract SPSMinter {
    * @param newReceiver Address of the receiver
    * @param newAmount Amount of tokens per block
    * @param newReductionBlocks Number of blocks between emission reduction
-   * @param newReductionPercentage Percentage to reduce emission
+   * @param newReductionBps Number of basis points to reduce emission
    */
-  function addPool(address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage) external onlyAdmin {
+  function addPool(address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps) external onlyAdmin {
     require(pools.length < poolsCap, 'SPSMinter: Pools cap reached');
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
-    pools.push(Pool(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number));
-    emit PoolAdded(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
+    require(newReductionBps <= 10000, "SPSMinter: newReductionBps cannot be larger than 10000");
+    pools.push(Pool(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number));
+    emit PoolAdded(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number);
   }
 
   /**
@@ -133,14 +134,14 @@ contract SPSMinter {
    * @param newReceiver Address of the receiver
    * @param newAmount Amount of tokens per block
    * @param newReductionBlocks Number of blocks between emission reduction
-   * @param newReductionPercentage Percentage to reduce emission (following the literal definition of percentage, i.e. out of 100)
+   * @param newReductionBps Number of basis points (1 bps = 1/100th of 1%)to reduce emission
    */
-  function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage) external onlyAdmin {
+  function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps) external onlyAdmin {
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
-    require(newReductionBlocks <= 100, "SPSMinter: newReductionBlocks cannot be larger than 100");
+    require(newReductionBps <= 10000, "SPSMinter: newReductionBps cannot be larger than 10000");
     mint();
-    pools[index] = Pool(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
-    emit PoolUpdated(index, newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
+    pools[index] = Pool(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number);
+    emit PoolUpdated(index, newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number);
   }
 
   /**
@@ -149,7 +150,7 @@ contract SPSMinter {
    */
   function updateEmissions(uint256 index) public {
     if (block.number - pools[index].lastUpdate > pools[index].reductionBlocks){
-      pools[index].amountPerBlock = (pools[index].amountPerBlock * (100 - pools[index].reductionPercentage)) / 100;
+      pools[index].amountPerBlock = (pools[index].amountPerBlock * (10000 - pools[index].reductionBps)) / 10000;
       if (minimumPayout > pools[index].amountPerBlock) pools[index].amountPerBlock = 0;
       pools[index].lastUpdate = block.number;
     }
