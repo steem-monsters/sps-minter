@@ -133,10 +133,11 @@ contract SPSMinter {
    * @param newReceiver Address of the receiver
    * @param newAmount Amount of tokens per block
    * @param newReductionBlocks Number of blocks between emission reduction
-   * @param newReductionPercentage Percentage to reduce emission
+   * @param newReductionPercentage Percentage to reduce emission (following the literal definition of percentage, i.e. out of 100)
    */
   function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage) external onlyAdmin {
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
+    require(newReductionBlocks <= 100, "SPSMinter: newReductionBlocks cannot be larger than 100");
     mint();
     pools[index] = Pool(newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
     emit PoolUpdated(index, newReceiver, newAmount, newReductionBlocks, newReductionPercentage, block.number);
