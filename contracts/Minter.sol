@@ -24,6 +24,8 @@ contract SPSMinter {
   uint256 constant public poolsCap = 100;
   /// @notice Maximum amount per block to each pool
   uint256 constant public maxToPoolPerBlock = 50 ether;
+  // @notice minimum payout before it's rounded to 0
+  uint256 constant public minimumPayout = 0.1 ether;
 
   /// @notice Struct to store information about each pool
   struct Pool {
@@ -101,9 +103,11 @@ contract SPSMinter {
       unchecked {
         totalMinted = totalMinted + amount;
       }
-      token.mint(pools[i].receiver, amount);
 
-      emit Mint(pools[i].receiver, amount);
+      if (totalMinted > 0){
+        token.mint(pools[i].receiver, amount);
+        emit Mint(pools[i].receiver, amount);
+      }
 
       unchecked { ++i; }
     }
@@ -144,7 +148,8 @@ contract SPSMinter {
    */
   function updateEmissions(uint256 index) public {
     if (block.number - pools[index].lastUpdate > pools[index].reductionBlocks){
-      pools[index].amountPerBlock = pools[index].amountPerBlock / 10000 * (10000 - (pools[index].reductionPercentage * 100));
+      pools[index].amountPerBlock = (pools[index].amountPerBlock * (100 - pools[index].reductionPercentage)) / 100;
+      if (minimumPayout > pools[index].amountPerBlock) pools[index].amountPerBlock = 0;
       pools[index].lastUpdate = block.number;
     }
   }
