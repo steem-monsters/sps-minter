@@ -41,7 +41,7 @@ contract SPSMinter {
   /// @notice Emitted when mint() is called
   event Mint(address indexed receiver, uint256 amount);
   /// @notice Emitted when pool is added
-  event PoolAdded(address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionPercentage, uint256 newLastUpdate);
+  event PoolAdded(address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate);
   /// @notice Emitted when pool is updated
   event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate);
   /// @notice Emitted when pool is removed
@@ -134,7 +134,7 @@ contract SPSMinter {
    * @param newReceiver Address of the receiver
    * @param newAmount Amount of tokens per block
    * @param newReductionBlocks Number of blocks between emission reduction
-   * @param newReductionBps Number of basis points (1 bps = 1/100th of 1%)to reduce emission
+   * @param newReductionBps Number of basis points (1 bps = 1/100th of 1%) to reduce emission
    */
   function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps) external onlyAdmin {
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
