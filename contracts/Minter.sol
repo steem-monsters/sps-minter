@@ -36,6 +36,7 @@ contract SPSMinter {
     uint256 reductionBlocks;
     uint256 reductionBps;
     uint256 lastUpdate;
+    address callAddress;
   }
   /// @notice Array to store all pools
   Pool[] public pools;
@@ -43,9 +44,9 @@ contract SPSMinter {
   /// @notice Emitted when mint() is called
   event Mint(address indexed receiver, uint256 amount);
   /// @notice Emitted when pool is added
-  event PoolAdded(address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate);
+  event PoolAdded(address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate, address newCallAddress);
   /// @notice Emitted when pool is updated
-  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate);
+  event PoolUpdated(uint256 index, address indexed newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, uint256 newLastUpdate, address newCallAddress);
   /// @notice Emitted when pool is removed
   event PoolRemoved(uint256 index, address indexed receiver, uint256 amount);
   /// @notice Emitted when admin address is updated
@@ -122,12 +123,12 @@ contract SPSMinter {
    * @param newReductionBlocks Number of blocks between emission reduction
    * @param newReductionBps Number of basis points to reduce emission
    */
-  function addPool(address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps) external onlyAdmin {
+  function addPool(address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, address newCallAddress) external onlyAdmin {
     require(pools.length < poolsCap, 'SPSMinter: Pools cap reached');
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
     require(newReductionBps <= BPS, "SPSMinter: newReductionBps cannot be larger than max allowed");
-    pools.push(Pool(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number));
-    emit PoolAdded(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number);
+    pools.push(Pool(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number, newCallAddress));
+    emit PoolAdded(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number, newCallAddress);
   }
 
   /**
@@ -138,12 +139,12 @@ contract SPSMinter {
    * @param newReductionBlocks Number of blocks between emission reduction
    * @param newReductionBps Number of basis points (1 bps = 1/100th of 1%) to reduce emission
    */
-  function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps) external onlyAdmin {
+  function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionBlocks, uint256 newReductionBps, address newCallAddress) external onlyAdmin {
     require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
     require(newReductionBps <= BPS, "SPSMinter: newReductionBps cannot be larger than max allowed");
     mint();
-    pools[index] = Pool(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number);
-    emit PoolUpdated(index, newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number);
+    pools[index] = Pool(newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number, newCallAddress);
+    emit PoolUpdated(index, newReceiver, newAmount, newReductionBlocks, newReductionBps, block.number, newCallAddress);
   }
 
   /**
@@ -155,6 +156,11 @@ contract SPSMinter {
       pools[index].amountPerBlock = (pools[index].amountPerBlock * (BPS - pools[index].reductionBps)) / BPS;
       if (minimumPayout > pools[index].amountPerBlock) pools[index].amountPerBlock = 0;
       pools[index].lastUpdate = block.number;
+
+      if (pools[index].callAddress != address(0)){
+        // Call external contract, won't revert on failure. Used to "notify" other contract that there was a change
+        pools[index].callAddress.call{value: 0}(abi.encodeWithSignature("minterCall()"));
+      }
     }
   }
 
