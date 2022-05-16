@@ -1,8 +1,8 @@
 const hre = require("hardhat");
 
-let newToken = ''
-let startBlock = ''
-let newAdmin = ''
+let newToken = '0x44883053bfcaf90af0787618173dd56e8c2deb36'
+let startBlock = '17511000'
+let newAdmin = '0xdf5fd6b21e0e7ac559b41cf2597126b3714f432c'
 
 async function main() {
   const Minter = await hre.ethers.getContractFactory("Minter");
