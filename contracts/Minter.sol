@@ -61,7 +61,7 @@ contract SPSMinter {
   /**
    * @notice Constructor of new minter contract
    * @param newToken Address of the token to mint
-   * @param startBlock Initial lastMint block
+   * @param startTimestamp Initial lastMint timestamp
    * @param newAdmin Initial admin address
    */
   constructor(address newToken, uint256 startTimestamp, address newAdmin){
@@ -119,7 +119,7 @@ contract SPSMinter {
   /**
    * @notice Add new pool, can be called by admin
    * @param newReceiver Address of the receiver
-   * @param newAmount Amount of tokens per block
+   * @param newAmount Amount of tokens per second
    * @param newReductionSeconds Number of seconds between emission reduction
    * @param newReductionBps Number of basis points to reduce emission
    */
@@ -135,12 +135,12 @@ contract SPSMinter {
    * @notice Update pool, can be called by admin
    * @param index Index in the array of the pool
    * @param newReceiver Address of the receiver
-   * @param newAmount Amount of tokens per block
+   * @param newAmount Amount of tokens per second
    * @param newReductionSeconds Number of seconds between emission reduction
    * @param newReductionBps Number of basis points (1 bps = 1/100th of 1%) to reduce emission
    */
   function updatePool(uint256 index, address newReceiver, uint256 newAmount, uint256 newReductionSeconds, uint256 newReductionBps, address newCallAddress) external onlyAdmin {
-    require(newAmount <= maxToPoolPerBlock, 'SPSMinter: Maximum amount per block reached');
+    require(newAmount <= maxToPoolPerSecond, 'SPSMinter: Maximum amount per second reached');
     require(newReductionBps <= BPS, "SPSMinter: newReductionBps cannot be larger than max allowed");
     mint();
     pools[index] = Pool(newReceiver, newAmount, newReductionSeconds, newReductionBps, block.timestamp, newCallAddress);

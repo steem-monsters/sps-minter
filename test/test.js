@@ -6,6 +6,10 @@ let testToken;
 let minter;
 let zeroAddres = "0x0000000000000000000000000000000000000000"
 
+function toFixed(x){
+  return parseFloat(x).toFixed(0)
+}
+
 describe("Minter", async function () {
 
   async function init(){
@@ -17,7 +21,7 @@ describe("Minter", async function () {
 
     let currentBlockNumber = await ethers.provider.getBlockNumber()
     const Minter = await hre.ethers.getContractFactory("SPSMinter");
-    minter = await Minter.deploy(testToken.address, currentBlockNumber + 1, accounts[0].address);
+    minter = await Minter.deploy(testToken.address, toFixed(new Date().getTime() / 1000) + 100, accounts[0].address);
     await minter.deployed();
   }
 
